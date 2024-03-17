@@ -1,0 +1,6 @@
+bin/debug/*.vs
+bin/debug/*.pdb
+bin/debug/*.ilk
+bin/release/*.ilk
+*.pdb
+*.ilk
