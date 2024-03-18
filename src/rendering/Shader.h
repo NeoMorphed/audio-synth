@@ -23,6 +23,7 @@ namespace Tactics
 		int get_uniform_location(const char* name);
 		void set_uniform_1i(const char* name, int value);
 		void set_uniform_1iv(const char* name, int count, int samplers[]);
+		void set_uniform_1f(const char* name, float value);
 		void set_uniform_mat4f(const char* name, const Matrix4 &matrix);
 		void set_uniform_vec4f(const char* name, const Vector4 &vector4);
 	};

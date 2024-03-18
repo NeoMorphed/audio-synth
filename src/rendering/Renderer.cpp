@@ -7,6 +7,7 @@
 #include "Sprite.h"
 #include "Shader.h"
 #include "Vertex.h"
+#include "core/ScopeTimer.h"
 
 
 #define GL_GPU_MEM_INFO_TOTAL_AVAILABLE_MEM_NVX 0x9048
@@ -25,8 +26,12 @@ unsigned int immediate_vertex_buffer;
 unsigned int immediate_vertex_array;
 unsigned int true_type_text_vertex_buffer;
 unsigned int true_type_text_vertex_array;
+unsigned int line_vbo;
+unsigned int line_vao;
 const int maxQuads = 10000;
 const int maxVertices = maxQuads * 4 * 10;
+const int MAX_POINT_COUNT = 10000;
+Vector3* line_points = (Vector3*)malloc(MAX_POINT_COUNT * sizeof(Vector3));
 float* verticesAttribs = new float[maxVertices];
 uint32_t* indices = new uint32_t[INDICES_SIZE];
 int verticeCount = 0;
@@ -45,6 +50,13 @@ void init_renderer()
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VtxPC), (const void*)offsetof(VtxPC, position));
 	glEnableVertexAttribArray(1);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(VtxPC), (const void*)offsetof(VtxPC, color));
+
+	line_vbo = create_vertex_buffer(NULL, sizeof(Vector3) * MAX_POINT_COUNT , GL_DYNAMIC_DRAW);
+	GLCall(glGenVertexArrays(1, &line_vao));
+	GLCall(glBindVertexArray(line_vao));
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vector3), 0);
+	//glBindVertexArray(0);
 
 	true_type_text_vertex_buffer = create_vertex_buffer(nullptr, 24 * sizeof(float), GL_DYNAMIC_DRAW);
 	GLCall(glGenVertexArrays(1, &true_type_text_vertex_array));
@@ -353,13 +365,15 @@ void draw_text(std::string text, Vector2 position, BmFont* font)
 	//glBindVertexArray(0);
 	//glBindTexture(GL_TEXTURE_2D, 0);
 }
-void draw_true_type_text(Font* font, Shader* shader, std::string text, float x, float y, float scale, Vector4 color)
+void draw_true_type_text(Font* font, Shader* shader, std::string text, float x, float y, float scale, Vector4 color, float dt)
 {
 	GLCall(glUseProgram(shader->program));
 	
 	shader->set_uniform_vec4f("text_color", color);
 	//iterate through all characters
 	std::string::const_iterator c;
+	float original_x_position = x;
+	int count = 0;
 	for (c = text.begin(); c!= text.end(); c++)
 	{
 		FontCharacter ch = font->fontCharacters[*c];
@@ -367,6 +381,23 @@ void draw_true_type_text(Font* font, Shader* shader, std::string text, float x, 
 		float xpos = x + ch.Bearing.x * scale;
 		// float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
 		float ypos = y - (ch.Bearing.y) * scale;
+
+		//xpos += sin((dt + count) * 15) * 1;
+		//ypos += sin((dt + count + dt) * 15) * 1;
+		//ypos += (sin((dt + count) * 1)) * 50;
+		//count++;
+
+		// if (*c == 32)
+		// {
+		// 	xpos.x += (font->face->glyph->advance.x >> 6) * scale;
+		// 	continue;
+		// }
+		// if (*c == 10)
+		// {
+		// 	xpos = original_x_position;
+		// 	ypos += font->size * scale;
+		// 	continue;
+		// }
 
 		float w = ch.Size.x * scale;
 		float h = ch.Size.y * scale;
@@ -425,11 +456,27 @@ void draw_true_type_text(Font* font, Shader* shader, std::string text, float x, 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 		glDrawArrays(GL_TRIANGLES, 0, 6);
-		//Advance cursors for next glyph (not that advance is number of 1/64 pixels)
+		//Advance cursors for next glyph (note that advance is number of 1/64 pixels)
 		x += (ch.Advance >> 6) * scale; //Bitshift by 6 to get value in pixels (2^6 = 64)
 	}
 	glBindVertexArray(0);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+void draw_lines_by_points(float* values, int value_count, Shader* shader)
+{
+	for (int i = 0; i < value_count; i++) {
+		line_points[i] = vec3(200 + (float)i * 1.5f, values[i] * 200 + 500, 0.0f);
+	}
+	set_shader(shader);
+	//shader->SetUniform4f("tint_color", color);
+	glBindBuffer(GL_ARRAY_BUFFER, line_vbo);
+	glBufferSubData(GL_ARRAY_BUFFER, 0, value_count * sizeof(Vector3), line_points);
+	glBindVertexArray(line_vao);
+	glEnable(GL_LINE_SMOOTH);
+	//glLineWidth(2);
+	GLCall(glDrawArrays(GL_LINE_STRIP, 0,  value_count));
+	//memset(line_points, 0, MAX_POINT_COUNT * sizeof(Vector3));
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 void draw_immediate_rectangle(Rectangle rect, Vector4 color, Shader* shader)
 {

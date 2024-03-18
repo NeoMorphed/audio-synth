@@ -116,13 +116,16 @@ namespace Tactics
 		GLCall(glUseProgram(program));
 		GLCall(glUniform1i(get_uniform_location(name), value));
 	}
-
 	void Shader::set_uniform_1iv(const char* name, int count, int samplers[])
 	{
 		GLCall(glUseProgram(program));
 		glUniform1iv(get_uniform_location(name), count, samplers);
 	}
-
+	void Shader::set_uniform_1f(const char* name, float value)
+	{
+		GLCall(glUseProgram(program));
+		GLCall(glUniform1f(get_uniform_location(name), value));
+	}
 	void Shader::set_uniform_mat4f(const char* name, const Matrix4 &matrix)
 	{
 		GLCall(glUseProgram(program));

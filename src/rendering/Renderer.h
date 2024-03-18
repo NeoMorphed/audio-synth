@@ -23,10 +23,11 @@ namespace Tactics
 	void 			draw_text(std::string text, Vector2 position, Vector4 color);
 	void 			draw_text(std::string text, Vector2 position, BmFont* font);
 	void 			draw_true_type_text(Font* font, Shader* shader, std::string text, float x, float y,
-											 float scale, Vector4 color);
+											 float scale, Vector4 color, float dt);
 	void 			draw_render_target(const RenderTarget &renderTarget, const Rectangle &rectangle, const Shader* shader);
 	void 			begin_render_batch();
 	void 			end_render_batch(const Shader* shader);
+	void 			draw_lines_by_points(float* values, int value_count, Shader* shader);
 	void 			draw_immediate_rectangle(Rectangle rect, Vector4 color, Shader* shader);
 	void 			draw_rectangle(Rectangle rectangle, Vector4 color);
 	void 			draw_queued_text();

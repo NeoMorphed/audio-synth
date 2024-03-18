@@ -89,11 +89,11 @@ Font* load_font(const std::string& path, int size)
 			vec2((float)face->glyph->bitmap_left, (float)face->glyph->bitmap_top),
 			(unsigned int)face->glyph->advance.x
 		};
-
 		fontCharacters.insert(std::pair<char, FontCharacter>(c, character));
 	}
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
 	Font* font = new Font(face, fontCharacters);
+	font->size = size;
 	return font;
 }
 // Font* load_font(const std::string& path)

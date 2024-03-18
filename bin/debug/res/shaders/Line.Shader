@@ -1,29 +1,25 @@
 #shader vertex
 #version 330 core
 
-layout(location = 0) in vec4 position;
-layout(location = 1) in vec4 color;
+layout(location = 0) in vec3 position;
 
-out vec4 VColor;
-uniform mat4 uMVP;
+uniform mat4 proj;
 
 void main()
 {
-    gl_Position = uMVP * position;
-    VColor = color;
+    //vFragPos = vec3(model * vec4(position, 1.0f));
+    gl_Position = proj * vec4(position, 1.0f);
 
-};
+}
 
 #shader fragment
 #version 330 core
 
 layout(location = 0) out vec4 color;
 
-in vec4 VColor;
+uniform vec4 tint_color;
 
 void main()
 {
-	
-    color = vec4(1, 1, 1, 1);
-    //vec4(1.0f, 0, 0, 1.0f)
-};
+	color = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+}
