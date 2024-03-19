@@ -29,6 +29,15 @@ const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
 const IID IID_IAudioClient = __uuidof(IAudioClient);
 const IID IID_IAudioRenderClient = __uuidof(IAudioRenderClient);
 
+enum Wave_Type {
+    EXPONENT_WAVE,
+    SINE_WAVE,
+    SQUARE_WAVE,
+    HALF_SQUARE_WAVE,
+    TRIANGLE_WAVE,
+    SAW_WAVE,
+    WAVE_TYPE_COUNT
+};
 struct Globals 
 {
     float* points;
@@ -43,6 +52,7 @@ struct Globals
     float b;
     float c;
     float d;
+    Wave_Type wave_type;
     bool test;
     bool sine;
     bool square;
@@ -50,7 +60,9 @@ struct Globals
     bool saw;
     bool noise;
     bool half_square;
+    bool pulse;
     bool abs;
+    bool abs_add;
     bool play;
     bool osc2;
 };
@@ -101,6 +113,7 @@ int run()
     globals.b = 1.0f;
     globals.c = 1.0f;
     globals.d = 1.0f;
+    globals.wave_type = SINE_WAVE;
     globals.test = true;
     globals.sine = false;
     globals.square = false;
@@ -108,7 +121,9 @@ int run()
     globals.saw = false;
     globals.noise = false;
     globals.abs = false;
+    globals.abs_add = false;
     globals.half_square = true;
+    globals.pulse = false;
     globals.play = false;
     globals.osc2 = false;
     globals.points = (float*)calloc(10000, sizeof(float));
@@ -164,6 +179,13 @@ void render_ui(Globals* globals)
     ImGui::DragFloat("tone_volume", (float*)&globals->tone_volume, 0.01f, 0.0f, 1.0f);
     ImGui::DragFloat("pan", (float*)&globals->pan, 0.01f, -1.0f, 1.0f);
     ImGui::DragFloat("pan_mod_hz", (float*)&globals->pan_mod_hz, 0.1f, 0.0f, 5000.0f);
+    //static int elem = SINE_WAVE;
+    const char* wave_names[WAVE_TYPE_COUNT] = { "Exponent", "Sine", "Square", "Half-Square", "Triangle", "Saw" };
+    const char* elem_name = 
+            (globals->wave_type >= 0 && globals->wave_type < WAVE_TYPE_COUNT) ? wave_names[globals->wave_type] : "Unknown";
+
+    ImGui::SliderInt("osc2 Wave Type", &(int)globals->wave_type, 0, WAVE_TYPE_COUNT - 1, elem_name);
+    printf("%d\n", globals->wave_type);
     // ImGui::DragFloat("bot", (float*)&globals->bot, 0.01f, 0.01f);
     // ImGui::DragFloat("a", (float*)&globals->a, 0.01f, 0.01f);
     // ImGui::DragFloat("b", (float*)&globals->b, 0.01f, 0.01f);
@@ -230,8 +252,10 @@ void render_ui(Globals* globals)
     ImGui::SameLine(75);
     ImGui::Checkbox("noise", &globals->noise);
     ImGui::Checkbox("abs", &globals->abs);
+    ImGui::Checkbox("abs_add", &globals->abs_add);
     ImGui::Checkbox("osc2", &globals->osc2);
     ImGui::Checkbox("half_square", &globals->half_square);
+    ImGui::Checkbox("pulse", &globals->pulse);
 
     ImGui::End();
 
@@ -378,7 +402,7 @@ DWORD audio_run(void* temp)
                     output_sine_wave(sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
                 else if (globals->square)
                     output_square_wave(sample_info, globals->tone_hz, 
-                                            globals->tone_volume, globals->half_square);
+                                            globals->tone_volume, globals->half_square, globals->pulse);
                 else if (globals->triangle)
                     output_triangle_wave(sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
                 else if (globals->saw)
@@ -386,7 +410,7 @@ DWORD audio_run(void* temp)
                 else if (globals->noise)
                     output_noise(sample_info, globals->tone_volume);
                 if (globals->osc2)
-                    add_by_osc2(globals, sample_info, globals->tone_hz, globals->tone_volume);
+                    add_by_osc2(sample_info, globals->tone_hz, globals->tone_volume, globals->wave_type, globals->abs_add);
                 amplitude_mod(sample_info, globals->amp_mod_hz);
                 //pan(samples_per_second, sample_count, samples, 1, globals->pan);
                 pan_mod(sample_info, globals->pan_mod_hz);
