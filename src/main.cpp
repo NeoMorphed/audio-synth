@@ -50,6 +50,7 @@ struct Globals
     bool saw;
     bool noise;
     bool half_square;
+    bool abs;
     bool play;
     bool osc2;
 };
@@ -106,6 +107,7 @@ int run()
     globals.triangle = false;
     globals.saw = false;
     globals.noise = false;
+    globals.abs = false;
     globals.half_square = true;
     globals.play = false;
     globals.osc2 = false;
@@ -162,11 +164,11 @@ void render_ui(Globals* globals)
     ImGui::DragFloat("tone_volume", (float*)&globals->tone_volume, 0.01f, 0.0f, 1.0f);
     ImGui::DragFloat("pan", (float*)&globals->pan, 0.01f, -1.0f, 1.0f);
     ImGui::DragFloat("pan_mod_hz", (float*)&globals->pan_mod_hz, 0.1f, 0.0f, 5000.0f);
-    ImGui::DragFloat("bot", (float*)&globals->bot, 0.01f, 0.01f);
-    ImGui::DragFloat("a", (float*)&globals->a, 0.01f, 0.01f);
-    ImGui::DragFloat("b", (float*)&globals->b, 0.01f, 0.01f);
-    ImGui::DragFloat("c", (float*)&globals->c, 0.01f, 0.01f);
-    ImGui::DragFloat("d", (float*)&globals->d, 0.01f, 0.01f);
+    // ImGui::DragFloat("bot", (float*)&globals->bot, 0.01f, 0.01f);
+    // ImGui::DragFloat("a", (float*)&globals->a, 0.01f, 0.01f);
+    // ImGui::DragFloat("b", (float*)&globals->b, 0.01f, 0.01f);
+    // ImGui::DragFloat("c", (float*)&globals->c, 0.01f, 0.01f);
+    // ImGui::DragFloat("d", (float*)&globals->d, 0.01f, 0.01f);
     if(ImGui::Button("test")) {
         globals->test = true;
         globals->sine = false;
@@ -227,6 +229,7 @@ void render_ui(Globals* globals)
     }
     ImGui::SameLine(75);
     ImGui::Checkbox("noise", &globals->noise);
+    ImGui::Checkbox("abs", &globals->abs);
     ImGui::Checkbox("osc2", &globals->osc2);
     ImGui::Checkbox("half_square", &globals->half_square);
 
@@ -370,16 +373,16 @@ DWORD audio_run(void* temp)
             sample_info.samples = (f32*)audio_data;
             //if (globals->play) {
                 if (globals->test)
-                    output_test_wave(globals, sample_info, globals->tone_hz, globals->tone_volume);
+                    output_test_wave(globals, sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
                 else if (globals->sine)
-                    output_sine_wave(sample_info, globals->tone_hz, globals->tone_volume);
+                    output_sine_wave(sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
                 else if (globals->square)
                     output_square_wave(sample_info, globals->tone_hz, 
                                             globals->tone_volume, globals->half_square);
                 else if (globals->triangle)
-                    output_triangle_wave(sample_info, globals->tone_hz, globals->tone_volume);
+                    output_triangle_wave(sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
                 else if (globals->saw)
-                    output_saw_wave(sample_info, globals->tone_hz, globals->tone_volume);
+                    output_saw_wave(sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
                 else if (globals->noise)
                     output_noise(sample_info, globals->tone_volume);
                 if (globals->osc2)
