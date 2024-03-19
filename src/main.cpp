@@ -39,11 +39,17 @@ struct Globals
     float pan;
     float pan_mod_hz;
     float bot;
+    float a;
+    float b;
+    float c;
+    float d;
+    bool test;
     bool sine;
     bool square;
+    bool triangle;
     bool saw;
     bool noise;
-    bool square_phase_shift;
+    bool half_square;
     bool play;
     bool osc2;
 };
@@ -90,11 +96,17 @@ int run()
     globals.pan = 0.0f;
     globals.pan_mod_hz = 0;
     globals.bot = 1.0f;
-    globals.sine = true;
+    globals.a = 1.0f;
+    globals.b = 1.0f;
+    globals.c = 1.0f;
+    globals.d = 1.0f;
+    globals.test = true;
+    globals.sine = false;
     globals.square = false;
+    globals.triangle = false;
     globals.saw = false;
     globals.noise = false;
-    globals.square_phase_shift = true;
+    globals.half_square = true;
     globals.play = false;
     globals.osc2 = false;
     globals.points = (float*)calloc(10000, sizeof(float));
@@ -131,7 +143,7 @@ int run()
                                         //150.0f, 600.0f, 1, vec4(1.0f), current_frame);
         render_ui(&globals);
         glfwSwapBuffers(window->glfw_window);
-        memset(globals.points, 0, globals.point_count * sizeof(float));
+        //memset(globals.points, 0, globals.point_count * sizeof(float));
     }
     return 0;
 }
@@ -151,40 +163,72 @@ void render_ui(Globals* globals)
     ImGui::DragFloat("pan", (float*)&globals->pan, 0.01f, -1.0f, 1.0f);
     ImGui::DragFloat("pan_mod_hz", (float*)&globals->pan_mod_hz, 0.1f, 0.0f, 5000.0f);
     ImGui::DragFloat("bot", (float*)&globals->bot, 0.01f, 0.01f);
+    ImGui::DragFloat("a", (float*)&globals->a, 0.01f, 0.01f);
+    ImGui::DragFloat("b", (float*)&globals->b, 0.01f, 0.01f);
+    ImGui::DragFloat("c", (float*)&globals->c, 0.01f, 0.01f);
+    ImGui::DragFloat("d", (float*)&globals->d, 0.01f, 0.01f);
+    if(ImGui::Button("test")) {
+        globals->test = true;
+        globals->sine = false;
+        globals->square = false;
+        globals->triangle = false;
+        globals->saw = false;
+        globals->noise = false;
+    }
+    ImGui::SameLine(75);
+    ImGui::Checkbox("test", &globals->test);
     if(ImGui::Button("sine")) {
+        globals->test = false;
         globals->sine = true;
         globals->square = false;
+        globals->triangle = false;
         globals->saw = false;
         globals->noise = false;
     }
     ImGui::SameLine(75);
     ImGui::Checkbox("sine", &globals->sine);
     if(ImGui::Button("square")) {
+        globals->test = false;
         globals->sine = false;
         globals->square = true;
+        globals->triangle = false;
         globals->saw = false;
         globals->noise = false;
     }
     ImGui::SameLine(75);
     ImGui::Checkbox("square", &globals->square);
-    if(ImGui::Button("saw")) {
+    if(ImGui::Button("triangle")) {
+        globals->test = false;
         globals->sine = false;
         globals->square = false;
+        globals->triangle = true;
+        globals->saw = false;
+        globals->noise = false;
+    }
+    ImGui::SameLine(75);
+    ImGui::Checkbox("triangle", &globals->triangle);
+    if(ImGui::Button("saw")) {
+        globals->test = false;
+        globals->sine = false;
+        globals->square = false;
+        globals->triangle = false;
         globals->saw = true;
         globals->noise = false;
     }
     ImGui::SameLine(75);
     ImGui::Checkbox("saw", &globals->saw);
     if(ImGui::Button("noise")) {
+        globals->test = false;
         globals->sine = false;
         globals->square = false;
+        globals->triangle = false;
         globals->saw = false;
         globals->noise = true;
     }
     ImGui::SameLine(75);
     ImGui::Checkbox("noise", &globals->noise);
     ImGui::Checkbox("osc2", &globals->osc2);
-    ImGui::Checkbox("square_phase_shift", &globals->square_phase_shift);
+    ImGui::Checkbox("half_square", &globals->half_square);
 
     ImGui::End();
 
@@ -325,24 +369,28 @@ DWORD audio_run(void* temp)
             sample_info.sample_count = sample_count;
             sample_info.samples = (f32*)audio_data;
             //if (globals->play) {
-                if (globals->sine)
+                if (globals->test)
+                    output_test_wave(globals, sample_info, globals->tone_hz, globals->tone_volume);
+                else if (globals->sine)
                     output_sine_wave(sample_info, globals->tone_hz, globals->tone_volume);
                 else if (globals->square)
                     output_square_wave(sample_info, globals->tone_hz, 
-                                            globals->tone_volume, globals->square_phase_shift);
+                                            globals->tone_volume, globals->half_square);
+                else if (globals->triangle)
+                    output_triangle_wave(sample_info, globals->tone_hz, globals->tone_volume);
                 else if (globals->saw)
                     output_saw_wave(sample_info, globals->tone_hz, globals->tone_volume);
                 else if (globals->noise)
                     output_noise(sample_info, globals->tone_volume);
                 if (globals->osc2)
                     add_by_osc2(globals, sample_info, globals->tone_hz, globals->tone_volume);
-                // for (int i = 0; i < sample_info.sample_count; i += 2) {
-                //     globals->points[i] = sample_info.samples[i];
-                // }
                 amplitude_mod(sample_info, globals->amp_mod_hz);
                 //pan(samples_per_second, sample_count, samples, 1, globals->pan);
                 pan_mod(sample_info, globals->pan_mod_hz);
                 memcpy(globals->points, audio_data, sample_count * 8);
+                // for (int i = 0; i < sample_info.sample_count; i += 2) {
+                //     globals->points[i] = sample_info.samples[i];
+                // }
                 globals->point_count = sample_count * 8;
                 hr = render_client->ReleaseBuffer(sample_count, 0);
            //}
@@ -417,6 +465,14 @@ void check_for_music_keyboard_keys(Globals* globals)
     }
     else if (key_down(KEY_K)) {
         globals->tone_hz = 2 * 261.6f; 
+        globals->play = true;
+    }
+    else if (key_down(KEY_Q)) {
+        globals->tone_hz = 100.6f; 
+        globals->play = true;
+    }
+    else if (key_down(KEY_W)) {
+        globals->tone_hz = 150.6f; 
         globals->play = true;
     }
     else globals->play = false;
