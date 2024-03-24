@@ -21,15 +21,19 @@ void output_test_wave(Globals* globals, Sample_Info info, f32 tone_hz, f32 tone_
     f64 _2_3 = (4 * PI) / 3;
     f64 _1_2   = PI / 2;
     f32* sample_out = info.samples;
+    float slope = (float)(((-1) - (1)) / (TAU - 0));
     for (int sample_index = 0; sample_index < info.sample_count; sample_index++) {
-        f32 sine_value = 0; 
+        f32 value = 0; 
         //printf("%f\n", t_sine);
-        if (t_sine <= PI / 2) sine_value = (float)pow((t_sine / 3.0f) - t_sine, 2.0);
-        else if (t_sine > PI / 2 && t_sine <= PI) sine_value = (float)pow(((PI - t_sine) / 3.0f) - (PI - t_sine), 2.0f);
-        else if (t_sine > PI && t_sine <= (3 * PI) / 2) sine_value = -(float)pow(((t_sine - PI) / 3.0f) - (t_sine - PI), 2.0);
-        else if (t_sine > (3 * PI) / 4 && t_sine <= TAU) sine_value = -(float)pow(((TAU - t_sine) / 3.0f) - (TAU - t_sine), 2.0f);
-        if (abs_modifier) sine_value = abs(sine_value);
-        f32 sample_value = (sine_value * tone_volume);
+        //float t_sine_range_1_0 = 0.0f + slope * ((float)t_sine - 0.0f);
+        //value = (float)asin(t_sine_range_1_0) * (float)sin(t_sine_range_1_0);
+        //else value = (float)asin(t_sine) * -(float)sin(t_sine);
+        if (t_sine <= PI / 2) value = (float)pow((t_sine / 3.0f) - t_sine, 2.0);
+        else if (t_sine > PI / 2 && t_sine <= PI) value = (float)pow(((PI - t_sine) / 3.0f) - (PI - t_sine), 2.0f);
+        else if (t_sine > PI && t_sine <= (3 * PI) / 2) value = -(float)pow(((t_sine - PI) / 3.0f) - (t_sine - PI), 2.0);
+        else if (t_sine > (3 * PI) / 4 && t_sine <= TAU) value = -(float)pow(((TAU - t_sine) / 3.0f) - (TAU - t_sine), 2.0f);
+        if (abs_modifier) value = abs(value);
+        f32 sample_value = (value * tone_volume);
         //f32 sample_value = (f32)(2 + 5 * sin((2 * M_PI) / 2 * 2) + 0.5);
         *sample_out++ = sample_value;
         *sample_out++ = sample_value;
@@ -98,6 +102,10 @@ void output_triangle_wave(Sample_Info info, f32 tone_hz, f32 tone_volume, bool a
     for (int sample_index = 0; sample_index < info.sample_count; sample_index++) {
         f32 value = 0; 
         value = 1.0f * (2 / PI) * (float)asin(sin(t_sine + 0.0f));
+        // Interesting sound for sound effects???
+        //value = 1.0f * (2 / PI) * (float)asin(sin(t_sine * t_sine + 0.0f));
+        //value = 1.0f * (2 / PI) * (float)((asin(sin(t_sine * t_sine ))) / (float)sin(t_sine * t_sine)) * (float)sin(t_sine);
+        //value = 1.0f * (2 / PI) * (float)asin(sin(t_sine * t_sine + 2 / t_sine));
         if (abs_modifier) value = abs(value);
         f32 sample_value = (value * tone_volume);
         *sample_out++ = sample_value;
@@ -125,7 +133,7 @@ void output_saw_wave(Sample_Info info, f32 tone_hz, f32 tone_volume, bool abs_mo
     }
 }
 
-void add_by_osc2(Sample_Info info, f32 tone_hz, f32 tone_volume, Wave_Type type, bool abs_modifier) {
+void add_by_osc2(Sample_Info info, f32 tone_hz, f32 tone_volume, Wave_Type type, float percentage, bool abs_modifier) {
     static f64 t_sine = 0;
     int wave_period = (int)(info.samples_per_second / tone_hz);
 
@@ -158,8 +166,8 @@ void add_by_osc2(Sample_Info info, f32 tone_hz, f32 tone_volume, Wave_Type type,
         if (abs_modifier) value = abs(value);
         f32 sample_value = (value * tone_volume);
         //f32 sample_value = (f32)(2 + 5 * sin((2 * M_PI) / 2 * 2) + 0.5);
-        *sample_out++ = *sample_out + sample_value;
-        *sample_out++ = *sample_out + sample_value;
+        *sample_out++ = *sample_out + (sample_value * percentage);
+        *sample_out++ = *sample_out + (sample_value * percentage);
         t_sine = inc_time_val(t_sine, wave_period);
     }
 }

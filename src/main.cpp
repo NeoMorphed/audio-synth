@@ -52,6 +52,7 @@ struct Globals
     float b;
     float c;
     float d;
+    float osc2_wave_percentage;
     Wave_Type wave_type;
     bool test;
     bool sine;
@@ -113,6 +114,7 @@ int run()
     globals.b = 1.0f;
     globals.c = 1.0f;
     globals.d = 1.0f;
+    globals.osc2_wave_percentage = 100.0f;
     globals.wave_type = SINE_WAVE;
     globals.test = true;
     globals.sine = false;
@@ -185,7 +187,7 @@ void render_ui(Globals* globals)
             (globals->wave_type >= 0 && globals->wave_type < WAVE_TYPE_COUNT) ? wave_names[globals->wave_type] : "Unknown";
 
     ImGui::SliderInt("osc2 Wave Type", &(int)globals->wave_type, 0, WAVE_TYPE_COUNT - 1, elem_name);
-    printf("%d\n", globals->wave_type);
+    ImGui::SliderFloat("osc2 wave_percentage", &globals->osc2_wave_percentage, 0.0f, 100.0f);
     // ImGui::DragFloat("bot", (float*)&globals->bot, 0.01f, 0.01f);
     // ImGui::DragFloat("a", (float*)&globals->a, 0.01f, 0.01f);
     // ImGui::DragFloat("b", (float*)&globals->b, 0.01f, 0.01f);
@@ -395,7 +397,7 @@ DWORD audio_run(void* temp)
             sample_info.samples_per_second = format->nSamplesPerSec;
             sample_info.sample_count = sample_count;
             sample_info.samples = (f32*)audio_data;
-            //if (globals->play) {
+            if (globals->play) {
                 if (globals->test)
                     output_test_wave(globals, sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
                 else if (globals->sine)
@@ -410,7 +412,8 @@ DWORD audio_run(void* temp)
                 else if (globals->noise)
                     output_noise(sample_info, globals->tone_volume);
                 if (globals->osc2)
-                    add_by_osc2(sample_info, globals->tone_hz, globals->tone_volume, globals->wave_type, globals->abs_add);
+                    add_by_osc2(sample_info, globals->tone_hz, globals->tone_volume, globals->wave_type, 
+                                            globals->osc2_wave_percentage / 100, globals->abs_add);
                 amplitude_mod(sample_info, globals->amp_mod_hz);
                 //pan(samples_per_second, sample_count, samples, 1, globals->pan);
                 pan_mod(sample_info, globals->pan_mod_hz);
@@ -420,8 +423,8 @@ DWORD audio_run(void* temp)
                 // }
                 globals->point_count = sample_count * 8;
                 hr = render_client->ReleaseBuffer(sample_count, 0);
-           //}
-            //else hr = render_client->ReleaseBuffer(sample_count, AUDCLNT_BUFFERFLAGS_SILENT);
+           }
+            else hr = render_client->ReleaseBuffer(sample_count, AUDCLNT_BUFFERFLAGS_SILENT);
             //AUDCLNT_BUFFERFLAGS_SILENT
         }
     }
