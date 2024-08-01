@@ -6,8 +6,6 @@
 //namespace Tactics {
 
 
-
-
 inline f64 inc_time_val(f64 t_sine, int wave_period)
 {
     // Maybe we should just make wave_period a float?
@@ -55,34 +53,38 @@ void output_sine_wave(Sample_Info info, f32 tone_hz, f32 tone_volume, bool abs_m
         t_sine = inc_time_val(t_sine, wave_period);
     }
 }
-void output_square_wave(Sample_Info info, f32 tone_hz, f32 tone_volume, bool half_square, bool pulse) {
+void output_square_wave(Sample_Info info, f32 tone_hz, f32 tone_volume) {
     static f64 t_sine = 0;
     int wave_period = (int)(info.samples_per_second / tone_hz);
 
-    f32 *sample_out = info.samples;
+    f32* sample_out = info.samples;
     for (int sample_index = 0; sample_index < info.sample_count; sample_index++) {
         f32 value = 0; 
-        // Technically not????
-        if (half_square) {
-            if (t_sine <= PI / 2) value = 1;
-            else if (t_sine > (3 * PI) / 2) value = 0;
-            // if (t_sine < PI / 2 || t_sine > (3 * PI) / 2) value = 1;
-            // else if (t_sine > PI / 2 || t_sine < (3 * PI) / 2) value = 0;
-        }
-        // else if (pulse) {
-        //     if (t_sine < PI) value = 1;
-        //     else if (t_sine > PI) value = -1;
-        // }
-        else {
-            // if (t_sine < PI) value = 1;
-            // else if (t_sine > PI) value = 0;
-            float sine_value = 1.0f * (float)sin(t_sine + 0.0f);
-            if (sine_value > 0) value = 1.0f;
-            else if (sine_value < 0) value = -1.0f;
-            else value = 0.0f;
-        }
+
+        float sine_value = 1.0f * (float)sin(t_sine + 0.0f);
+        if (sine_value > 0) value = 1.0f;
+        else if (sine_value < 0) value = -1.0f;
+        else value = 0.0f;
+        
         f32 sample_value = (value * tone_volume);
         //f32 sample_value = (f32)(2 + 5 * sin((2 * M_PI) / 2 * 2) + 0.5);
+        *sample_out++ = sample_value;
+        *sample_out++ = sample_value;
+        t_sine = inc_time_val(t_sine, wave_period);
+    }
+}
+void output_half_square_wave(Sample_Info info, f32 tone_hz, f32 tone_volume) {
+    static f64 t_sine = 0;
+    int wave_period = (int)(info.samples_per_second / tone_hz);
+
+    f32* sample_out = info.samples;
+    for (int sample_index = 0; sample_index < info.sample_count; sample_index++) {
+        f32 value = 0; 
+        
+        if (t_sine <= PI / 2) value = 1;
+        else if (t_sine > (3 * PI) / 2) value = 0;
+        
+        f32 sample_value = (value * tone_volume);
         *sample_out++ = sample_value;
         *sample_out++ = sample_value;
         t_sine = inc_time_val(t_sine, wave_period);
@@ -98,7 +100,7 @@ void output_triangle_wave(Sample_Info info, f32 tone_hz, f32 tone_volume, bool a
     float slope3 = (float)((1 - 0) / (TAU - (3 * PI) / 2));
     //slope = (output_end - output_start) / (input_end - input_start)
     //output = output_start + slope * (input - input_start)
-    f32 *sample_out = info.samples;
+    f32* sample_out = info.samples;
     for (int sample_index = 0; sample_index < info.sample_count; sample_index++) {
         f32 value = 0; 
         value = 1.0f * (2 / PI) * (float)asin(sin(t_sine + 0.0f));

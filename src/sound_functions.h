@@ -4,6 +4,7 @@
 namespace Tactics {
 
 
+
 inline f64 inc_time_val(f64 t_sine, int wave_period)
 {
     // Maybe we should just make wave_period a float?
