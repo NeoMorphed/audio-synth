@@ -465,7 +465,7 @@ void draw_true_type_text(Font* font, Shader* shader, std::string text, float x, 
 void draw_lines_by_points(float* values, int value_count, Shader* shader)
 {
 	for (int i = 0; i < value_count; i++) {
-		line_points[i] = vec3(200 + (float)i * 1.5f, values[i] * 200 + 500, 0.0f);
+		line_points[i] = vec3(200 + (float)i * 1.5f, -values[i] * 200 + 500, 0.0f);
 	}
 	set_shader(shader);
 	//shader->SetUniform4f("tint_color", color);

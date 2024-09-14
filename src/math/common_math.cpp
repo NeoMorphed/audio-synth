@@ -20,4 +20,18 @@ namespace Tactics
 	{
   		return (1 - t) * v0 + t * v1;
   	}
+  	// float pow2(float x, float y)
+  	// {
+  	// 	float result = x;
+  	// 	if (y < 0.0f) {
+  	// 		y = -y;
+  	// 		for (int i = 0; i < (int)y - 1; i++) {
+  	// 			result = result * x;
+  	// 		}
+  	// 		result = 1.0f / result;
+  	// 		//printf("%f\n", result);
+  	// 		printf("x = %f result = %f\n", x, result);
+  	// 	}
+  	// 	return result;
+  	// }
 }

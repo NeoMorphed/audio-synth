@@ -11,7 +11,8 @@ namespace Tactics
 	Vector2 transform_vec2(const Vector2 &position, const Matrix4 &matrix);
 	float to_radians(float degrees);
 	float to_degrees(float radians);
-	float lerp(float v0, float v1, float t);	
+	float lerp(float v0, float v1, float t);
+	//float pow2(float x, float y);	
 }
 
 #endif

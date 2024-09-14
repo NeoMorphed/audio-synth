@@ -20,6 +20,12 @@
 
 //#include <endpointvolume.h>
 
+
+// @Cleanup We should figure out a better way to communicate between threads when it comes to setting values
+// in the globals struct.
+// @Bug When combining 2 waveforms, the wave changes depending on when the button to combine them is pressed.
+// We need to reset the timers on all the wave generators whenever we enable or disable combining.
+
 #define TAU (M_PI * 2)
 
 namespace Tactics {
@@ -29,6 +35,17 @@ const IID IID_IMMDeviceEnumerator = __uuidof(IMMDeviceEnumerator);
 const IID IID_IAudioClient = __uuidof(IAudioClient);
 const IID IID_IAudioRenderClient = __uuidof(IAudioRenderClient);
 
+enum Wave_Type {
+    EXPONENT_WAVE,
+    SINE_WAVE,
+    SQUARE_WAVE,
+    HALF_SQUARE_WAVE,
+    TRIANGLE_WAVE,
+    SAW_WAVE,
+    NOISE_WAVE,
+    WAVE_TYPE_COUNT
+};
+// Pack the bools into a u32 to shrink the struct size.
 struct Globals 
 {
     float* points;
@@ -38,14 +55,14 @@ struct Globals
     float tone_volume;
     float pan;
     float pan_mod_hz;
-    float bot;
-    bool sine;
-    bool square;
-    bool saw;
-    bool noise;
-    bool square_phase_shift;
+    float osc2_wave_percentage;
+    Wave_Type osc2_wave_type;
+    Wave_Type osc1_wave_type;
+    bool abs;
+    bool abs_add;
     bool play;
     bool osc2;
+    bool pan_mod;
 };
 struct Sample_Info
 {
@@ -54,6 +71,8 @@ struct Sample_Info
     float* samples;
 };
 
+// We do this for now since we use the globals struct in the functions in this file. 
+// We should find a better way to do this
 #include "sound_functions.cpp"
 
 void init_imgui(Window* window);
@@ -89,14 +108,14 @@ int run()
     globals.tone_volume = 0.25f;
     globals.pan = 0.0f;
     globals.pan_mod_hz = 0;
-    globals.bot = 1.0f;
-    globals.sine = true;
-    globals.square = false;
-    globals.saw = false;
-    globals.noise = false;
-    globals.square_phase_shift = true;
+    globals.osc1_wave_type = SINE_WAVE;
+    globals.osc2_wave_percentage = 100.0f;
+    globals.osc2_wave_type = SINE_WAVE;
+    globals.abs = false;
+    globals.abs_add = false;
     globals.play = false;
     globals.osc2 = false;
+    globals.pan_mod = false;
     globals.points = (float*)calloc(10000, sizeof(float));
     globals.point_count = 10000;
 
@@ -131,7 +150,7 @@ int run()
                                         //150.0f, 600.0f, 1, vec4(1.0f), current_frame);
         render_ui(&globals);
         glfwSwapBuffers(window->glfw_window);
-        memset(globals.points, 0, globals.point_count * sizeof(float));
+        //memset(globals.points, 0, globals.point_count * sizeof(float));
     }
     return 0;
 }
@@ -145,46 +164,38 @@ void render_ui(Globals* globals)
     //ImGui::ShowDemoWindow();
     ImGui::Begin("wave_form", NULL, ImGuiWindowFlags_None);
 
+    ImGui::Checkbox("pan_mod", &globals->pan_mod);
+
     ImGui::DragFloat("tone_hz", (float*)&globals->tone_hz, 1.0f);
     ImGui::DragFloat("amp_mod_hz", (float*)&globals->amp_mod_hz, 0.1f, 0.0f, 5000.0);
     ImGui::DragFloat("tone_volume", (float*)&globals->tone_volume, 0.01f, 0.0f, 1.0f);
-    ImGui::DragFloat("pan", (float*)&globals->pan, 0.01f, -1.0f, 1.0f);
-    ImGui::DragFloat("pan_mod_hz", (float*)&globals->pan_mod_hz, 0.1f, 0.0f, 5000.0f);
-    ImGui::DragFloat("bot", (float*)&globals->bot, 0.01f, 0.01f);
-    if(ImGui::Button("sine")) {
-        globals->sine = true;
-        globals->square = false;
-        globals->saw = false;
-        globals->noise = false;
+    if (!globals->pan_mod) {
+        ImGui::DragFloat("pan", (float*)&globals->pan, 0.01f, -1.0f, 1.0f);
+    } else {
+        ImGui::DragFloat("pan_mod_hz", (float*)&globals->pan_mod_hz, 0.1f, 0.0f, 5000.0f);
     }
-    ImGui::SameLine(75);
-    ImGui::Checkbox("sine", &globals->sine);
-    if(ImGui::Button("square")) {
-        globals->sine = false;
-        globals->square = true;
-        globals->saw = false;
-        globals->noise = false;
-    }
-    ImGui::SameLine(75);
-    ImGui::Checkbox("square", &globals->square);
-    if(ImGui::Button("saw")) {
-        globals->sine = false;
-        globals->square = false;
-        globals->saw = true;
-        globals->noise = false;
-    }
-    ImGui::SameLine(75);
-    ImGui::Checkbox("saw", &globals->saw);
-    if(ImGui::Button("noise")) {
-        globals->sine = false;
-        globals->square = false;
-        globals->saw = false;
-        globals->noise = true;
-    }
-    ImGui::SameLine(75);
-    ImGui::Checkbox("noise", &globals->noise);
+
+
+    // @Cleanup Remove terenary operator. I don't normally like to use it.
+    const char* osc1_wave_names[WAVE_TYPE_COUNT] = { "Exponent", "Sine", "Square", "Half-Square", "Triangle", "Saw", "Noise" };
+    const char* osc1_elem_name = 
+            (globals->osc1_wave_type >= 0 && globals->osc1_wave_type < WAVE_TYPE_COUNT) 
+                ? osc1_wave_names[globals->osc1_wave_type] : "Unknown";
+
+    ImGui::SliderInt("osc_1 Wave Type", &(int)globals->osc1_wave_type, 0, WAVE_TYPE_COUNT - 1, osc1_elem_name);
+
+    const char* wave_names[WAVE_TYPE_COUNT] = { "Exponent", "Sine", "Square", "Half-Square", "Triangle", "Saw", "Noise" };
+    const char* elem_name = 
+            (globals->osc2_wave_type >= 0 && globals->osc2_wave_type < WAVE_TYPE_COUNT) 
+                ? wave_names[globals->osc2_wave_type] : "Unknown";
+
+    ImGui::SliderInt("osc_2 Wave Type", &(int)globals->osc2_wave_type, 0, WAVE_TYPE_COUNT - 1, elem_name);
+    ImGui::SliderFloat("osc_2 wave_percentage", &globals->osc2_wave_percentage, 0.0f, 100.0f);
+
+    ImGui::Checkbox("abs", &globals->abs);
+    ImGui::Checkbox("abs_add", &globals->abs_add);
     ImGui::Checkbox("osc2", &globals->osc2);
-    ImGui::Checkbox("square_phase_shift", &globals->square_phase_shift);
+
 
     ImGui::End();
 
@@ -261,14 +272,14 @@ DWORD audio_run(void* temp)
     // if (var_name.vt != VT_EMPTY) {
     // 	printf("Endpoint: \"%S\" (%S)\n", var_name.pwszVal, endpoint_id);
     // }
-    // printf("Mix format:\n");
-    // printf("  Format Tag:           %d\n", format->wFormatTag);
-    // printf("  Sample rate:          %d\n", format->nSamplesPerSec);
-    // printf("  Avg bytes per second: %d\n", format->nAvgBytesPerSec);
-    // printf("  Bits per sample:      %d\n", format->wBitsPerSample);
-    // printf("  Block Align:          %d\n", format->nBlockAlign);
-    // printf("  Channels:             %d\n", format->nChannels);
-    // printf("  Audio Frame Size:     %d\n", format->nBlockAlign);
+    printf("Mix format:\n");
+    printf("  Format Tag:           %d\n", format->wFormatTag);
+    printf("  Sample rate:          %d\n", format->nSamplesPerSec);
+    printf("  Avg bytes per second: %d\n", format->nAvgBytesPerSec);
+    printf("  Bits per sample:      %d\n", format->wBitsPerSample);
+    printf("  Block Align:          %d\n", format->nBlockAlign);
+    printf("  Channels:             %d\n", format->nChannels);
+    printf("  Audio Frame Size:     %d\n", format->nBlockAlign);
 
     hr = audio_client->Start();
     assert(SUCCEEDED(hr));
@@ -324,35 +335,47 @@ DWORD audio_run(void* temp)
             sample_info.samples_per_second = format->nSamplesPerSec;
             sample_info.sample_count = sample_count;
             sample_info.samples = (f32*)audio_data;
-            //if (globals->play) {
-                if (globals->sine)
-                    output_sine_wave(sample_info, globals->tone_hz, globals->tone_volume);
-                else if (globals->square)
+            if (globals->play) {
+                if (globals->osc1_wave_type == EXPONENT_WAVE)
+                    output_test_wave(globals, sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
+                else if (globals->osc1_wave_type == SINE_WAVE)
+                    output_sine_wave(sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
+                else if (globals->osc1_wave_type == HALF_SQUARE_WAVE)
+                    output_half_square_wave(sample_info, globals->tone_hz, 
+                                            globals->tone_volume);
+                else if (globals->osc1_wave_type == SQUARE_WAVE)
                     output_square_wave(sample_info, globals->tone_hz, 
-                                            globals->tone_volume, globals->square_phase_shift);
-                else if (globals->saw)
-                    output_saw_wave(sample_info, globals->tone_hz, globals->tone_volume);
-                else if (globals->noise)
+                                            globals->tone_volume);
+                else if (globals->osc1_wave_type == TRIANGLE_WAVE)
+                    output_triangle_wave(sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
+                else if (globals->osc1_wave_type == SAW_WAVE)
+                    output_saw_wave(sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
+                else if (globals->osc1_wave_type == NOISE_WAVE)
                     output_noise(sample_info, globals->tone_volume);
                 if (globals->osc2)
-                    add_by_osc2(globals, sample_info, globals->tone_hz, globals->tone_volume);
+                    add_by_osc2(sample_info, globals->tone_hz, globals->tone_volume, globals->osc2_wave_type, 
+                                            globals->osc2_wave_percentage / 100, globals->abs_add);
+                amplitude_mod(sample_info, globals->amp_mod_hz);
+                if (!globals->pan_mod) {
+                    pan(sample_info, globals->tone_hz, globals->pan);
+                } else {
+                    pan_mod(sample_info, globals->pan_mod_hz);
+                }
+                memcpy(globals->points, audio_data, sample_count * 8);
                 // for (int i = 0; i < sample_info.sample_count; i += 2) {
                 //     globals->points[i] = sample_info.samples[i];
                 // }
-                amplitude_mod(sample_info, globals->amp_mod_hz);
-                //pan(samples_per_second, sample_count, samples, 1, globals->pan);
-                pan_mod(sample_info, globals->pan_mod_hz);
-                memcpy(globals->points, audio_data, sample_count * 8);
                 globals->point_count = sample_count * 8;
                 hr = render_client->ReleaseBuffer(sample_count, 0);
-           //}
-            //else hr = render_client->ReleaseBuffer(sample_count, AUDCLNT_BUFFERFLAGS_SILENT);
+           }
+            else hr = render_client->ReleaseBuffer(sample_count, AUDCLNT_BUFFERFLAGS_SILENT);
             //AUDCLNT_BUFFERFLAGS_SILENT
         }
     }
 	return 0;
 }
 
+// A bit messy. Maybe a hashmap or look up table.
 void check_for_music_keyboard_keys(Globals* globals)
 {
     if (key_down(KEY_Z)) {
@@ -417,6 +440,14 @@ void check_for_music_keyboard_keys(Globals* globals)
     }
     else if (key_down(KEY_K)) {
         globals->tone_hz = 2 * 261.6f; 
+        globals->play = true;
+    }
+    else if (key_down(KEY_Q)) {
+        globals->tone_hz = 100.6f; 
+        globals->play = true;
+    }
+    else if (key_down(KEY_W)) {
+        globals->tone_hz = 150.6f; 
         globals->play = true;
     }
     else globals->play = false;
