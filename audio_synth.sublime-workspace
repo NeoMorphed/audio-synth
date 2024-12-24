@@ -47,6 +47,52 @@
 	},
 	"buffers":
 	[
+		{
+			"file": "src/main.cpp",
+			"settings":
+			{
+				"buffer_size": 16671,
+				"line_ending": "Windows"
+			},
+			"undo_stack":
+			[
+			]
+		},
+		{
+			"file": "src/sound_functions.h",
+			"settings":
+			{
+				"buffer_size": 3029,
+				"line_ending": "Windows"
+			},
+			"undo_stack":
+			[
+			]
+		},
+		{
+			"file": "src/sound_functions.cpp",
+			"settings":
+			{
+				"buffer_size": 10112,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "/C/Users/Joshua/Desktop/resume_project_notes.txt",
+			"settings":
+			{
+				"buffer_size": 4652,
+				"line_ending": "Windows"
+			}
+		},
+		{
+			"file": "build.bat",
+			"settings":
+			{
+				"buffer_size": 2136,
+				"line_ending": "Windows"
+			}
+		}
 	],
 	"build_system": "",
 	"build_system_choices":
@@ -379,6 +425,7 @@
 	],
 	"file_history":
 	[
+		"/C/network_programs/port_scanner/src/main.cpp",
 		"/C/Users/Joshua/Desktop/resume_project_notes.txt",
 		"/C/audio_thing/src/main.cpp",
 		"/C/audio_thing/src/sound_functions.cpp",
@@ -505,12 +552,11 @@
 		"/C/2D Game/src/core/World.cpp",
 		"/C/2D Game/src/file/TextFileHandler.cpp",
 		"/C/2D Game/asset-builder/AssetBuilder.cpp",
-		"/C/2D Game/src/game/Door.h",
-		"/F/Users/Joshua Craft/Documents/writing_stuff/fantasy_ideas.txt"
+		"/C/2D Game/src/game/Door.h"
 	],
 	"find":
 	{
-		"height": 29.0
+		"height": 66.0
 	},
 	"find_in_files":
 	{
@@ -528,6 +574,8 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"ptr",
+			"result",
 			"pan",
 			"i",
 			"wave_type",
@@ -653,9 +701,7 @@
 			"Input::KeyDown",
 			"glfw_window()",
 			"win_glfw_window",
-			"win_should_close",
-			"win_height",
-			"win_width"
+			"win_should_close"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -699,11 +745,197 @@
 		{
 			"sheets":
 			[
+				{
+					"buffer": 0,
+					"file": "src/main.cpp",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 16671,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1192,
+								1192
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++ Extended/C++ Extended.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "src/sound_functions.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 3029,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1384,
+								1384
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++ Extended/C++ Extended.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "src/sound_functions.cpp",
+					"selected": true,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10112,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++ Extended/C++ Extended.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 3360.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"stack_multiselect": false,
+					"type": "text"
+				}
 			]
 		},
 		{
 			"sheets":
 			[
+				{
+					"buffer": 3,
+					"file": "/C/Users/Joshua/Desktop/resume_project_notes.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 4652,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "build.bat",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2136,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								2047,
+								2047
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Batch File/Batch File.sublime-syntax"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"stack_multiselect": false,
+					"type": "text"
+				},
+				{
+					"buffer": 0,
+					"file": "src/main.cpp",
+					"selected": true,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 16671,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								7642,
+								7642
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++ Extended/C++ Extended.sublime-syntax",
+							"tab_size": 4,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 4160.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"stack_multiselect": false,
+					"type": "text"
+				}
 			]
 		}
 	],
@@ -771,11 +1003,27 @@
 		"selected_items":
 		[
 			[
+				"sounds",
+				"src\\sound_functions.cpp"
+			],
+			[
 				"",
-				"src\\main.cpp"
+				"src\\sound_functions.h"
+			],
+			[
+				"sound",
+				"src\\sound_functions.h"
 			],
 			[
 				"main.cpp",
+				"src\\main.cpp"
+			],
+			[
+				"build",
+				"build.bat"
+			],
+			[
+				"main",
 				"src\\main.cpp"
 			],
 			[
@@ -785,10 +1033,6 @@
 			[
 				"soun",
 				"src\\sound_functions.cpp"
-			],
-			[
-				"sound",
-				"src\\sound_functions.h"
 			],
 			[
 				"type",
@@ -805,10 +1049,6 @@
 			[
 				"assets.cpp",
 				"src\\core\\Assets.cpp"
-			],
-			[
-				"main",
-				"src\\main.cpp"
 			],
 			[
 				"mian.cpp",
@@ -1143,10 +1383,6 @@
 				"untitled"
 			],
 			[
-				"build",
-				"build.bat"
-			],
-			[
 				"main.cp",
 				"src\\main.cpp"
 			],
@@ -1277,10 +1513,6 @@
 			[
 				"test_map.tmx",
 				"2D Game\\bin\\debug\\res\\maps\\test_map.tmx"
-			],
-			[
-				"player.h",
-				"2D Game\\src\\game\\Player.h"
 			]
 		],
 		"width": 0.0
@@ -1288,12 +1520,16 @@
 	"select_project":
 	{
 		"height": 500.0,
-		"last_filter": "",
+		"last_filter": "pri",
 		"selected_items":
 		[
 			[
+				"pri",
+				"C:\\pirate_game\\pirate_game.sublime-project"
+			],
+			[
 				"",
-				"C:\\vulkan\\vulkan_rendering.sublime-project"
+				"C:\\2D Game\\adventure.sublime-project"
 			]
 		],
 		"width": 380.0
@@ -1307,7 +1543,7 @@
 		],
 		"width": 0.0
 	},
-	"selected_group": 0,
+	"selected_group": 1,
 	"settings":
 	{
 		"last_automatic_layout":
