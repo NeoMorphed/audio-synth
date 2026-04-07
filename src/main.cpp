@@ -202,6 +202,7 @@ void render_ui(Globals* globals)
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
 }
+
 DWORD audio_run(void* temp)
 {
     Globals* globals = (Globals*)temp;
@@ -284,6 +285,11 @@ DWORD audio_run(void* temp)
     hr = audio_client->Start();
     assert(SUCCEEDED(hr));
 
+
+    f64 wave_position_values[WAVE_TYPE_COUNT];
+    memset(wave_position_values, 0, sizeof(f64) * WAVE_TYPE_COUNT);
+    
+
     while(true) {
     	WaitForSingleObject(h_refill_event, INFINITE);
         
@@ -337,35 +343,32 @@ DWORD audio_run(void* temp)
             sample_info.samples = (f32*)audio_data;
             if (globals->play) {
                 if (globals->osc1_wave_type == EXPONENT_WAVE)
-                    output_test_wave(globals, sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
+                    output_test_wave(globals, sample_info);
                 else if (globals->osc1_wave_type == SINE_WAVE)
-                    output_sine_wave(sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
+                    output_sine_wave(globals, sample_info);
                 else if (globals->osc1_wave_type == HALF_SQUARE_WAVE)
-                    output_half_square_wave(sample_info, globals->tone_hz, 
-                                            globals->tone_volume);
+                    output_half_square_wave(globals, sample_info);
                 else if (globals->osc1_wave_type == SQUARE_WAVE)
-                    output_square_wave(sample_info, globals->tone_hz, 
-                                            globals->tone_volume);
+                    output_square_wave(globals, sample_info);
                 else if (globals->osc1_wave_type == TRIANGLE_WAVE)
-                    output_triangle_wave(sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
+                    output_triangle_wave(globals, sample_info);
                 else if (globals->osc1_wave_type == SAW_WAVE)
-                    output_saw_wave(sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
+                    output_saw_wave(globals, sample_info);
                 else if (globals->osc1_wave_type == NOISE_WAVE)
-                    output_noise(sample_info, globals->tone_volume);
+                    output_noise(globals, sample_info);
                 if (globals->osc2)
-                    add_by_osc2(sample_info, globals->tone_hz, globals->tone_volume, globals->osc2_wave_type, 
-                                            globals->osc2_wave_percentage / 100, globals->abs_add);
-                amplitude_mod(sample_info, globals->amp_mod_hz);
+                    add_by_osc2(globals, sample_info);
+                amplitude_mod(globals, sample_info);
                 if (!globals->pan_mod) {
-                    pan(sample_info, globals->tone_hz, globals->pan);
+                    pan(globals, sample_info);
                 } else {
-                    pan_mod(sample_info, globals->pan_mod_hz);
+                    pan_mod(globals, sample_info);
                 }
-                memcpy(globals->points, audio_data, sample_count * 8);
-                // for (int i = 0; i < sample_info.sample_count; i += 2) {
-                //     globals->points[i] = sample_info.samples[i];
-                // }
+                
+                // For rendering the waveform
                 globals->point_count = sample_count * 8;
+                memcpy(globals->points, audio_data, globals->point_count);
+
                 hr = render_client->ReleaseBuffer(sample_count, 0);
            }
             else hr = render_client->ReleaseBuffer(sample_count, AUDCLNT_BUFFERFLAGS_SILENT);
