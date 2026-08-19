@@ -6,6 +6,7 @@
 #include "RenderTarget.h"
 #include "Sprite.h"
 #include "Shader.h"
+#include "Texture.h"
 #include "Vertex.h"
 #include "core/ScopeTimer.h"
 
@@ -216,252 +217,252 @@ void draw_sprite(Sprite* sprite)
 	}
 	z_index -= 0.000001f;
 }
-void draw_text(std::string text, Vector2 position, Vector4 color)
-{
-	int line_count = 0;
-	Vector2 char_position = position;
-	for (int i = 0; i < text.size(); i++)
-	{
-		char test_char = text[i];
-		if (test_char == '\n')
-		{
-			//printf(text[i]);
-			line_count++;
-			char_position.x = position.x;
-			continue;
-		}
-		//log(text);
-		FontChar ch = default_font->font_chars[text[i]];
+// void draw_text(std::string text, Vector2 position, Vector4 color)
+// {
+// 	int line_count = 0;
+// 	Vector2 char_position = position;
+// 	for (int i = 0; i < text.size(); i++)
+// 	{
+// 		char test_char = text[i];
+// 		if (test_char == '\n')
+// 		{
+// 			//printf(text[i]);
+// 			line_count++;
+// 			char_position.x = position.x;
+// 			continue;
+// 		}
+// 		//log(text);
+// 		FontChar ch = default_font->font_chars[text[i]];
 
-		float xpos = char_position.x + ch.bearing.x;
-		float ypos = char_position.y + (ch.bearing.y);
+// 		float xpos = char_position.x + ch.bearing.x;
+// 		float ypos = char_position.y + (ch.bearing.y);
 
 
-		ypos += default_font->line_height * line_count;
-		float w = (float)ch.source_rect.width;
-		float h = (float)ch.source_rect.height;
+// 		ypos += default_font->line_height * line_count;
+// 		float w = (float)ch.source_rect.width;
+// 		float h = (float)ch.source_rect.height;
 
-		float texX = (float)ch.source_rect.x;
-		float texY = (default_font->texture->height - ((ch.source_rect.height * ((ch.source_rect.y + ch.source_rect.height) / (float)ch.source_rect.height))));
-		float texWidth = (texX + ch.source_rect.width) / (float)default_font->texture->width;
-		float texHeight = (texY + ch.source_rect.height) / (float)default_font->texture->height;
-		texX /= (float)default_font->texture->width;
-		texY /= (float)default_font->texture->height;
-		Vector2 texCoords[4];
-		texCoords[0] = vec2(texX, texY);
-		texCoords[1] = vec2(texWidth, texY);
-		texCoords[2] = vec2(texWidth, texHeight);
-		texCoords[3] = vec2(texX, texHeight);
-		Vector3 positions[4];
-		positions[0] = vec3(std::floor(xpos), std::floor(ypos) + (float)ch.source_rect.height, z_index);
-		positions[1] = vec3(std::floor(xpos) + (float)ch.source_rect.width, std::floor(ypos) + (float)ch.source_rect.height, z_index);
-		positions[2] = vec3(std::floor(xpos) + (float)ch.source_rect.width, std::floor(ypos), z_index);
-		positions[3] = vec3(std::floor(xpos), std::floor(ypos), z_index);
+// 		float texX = (float)ch.source_rect.x;
+// 		float texY = (default_font->texture->height - ((ch.source_rect.height * ((ch.source_rect.y + ch.source_rect.height) / (float)ch.source_rect.height))));
+// 		float texWidth = (texX + ch.source_rect.width) / (float)default_font->texture->width;
+// 		float texHeight = (texY + ch.source_rect.height) / (float)default_font->texture->height;
+// 		texX /= (float)default_font->texture->width;
+// 		texY /= (float)default_font->texture->height;
+// 		Vector2 texCoords[4];
+// 		texCoords[0] = vec2(texX, texY);
+// 		texCoords[1] = vec2(texWidth, texY);
+// 		texCoords[2] = vec2(texWidth, texHeight);
+// 		texCoords[3] = vec2(texX, texHeight);
+// 		Vector3 positions[4];
+// 		positions[0] = vec3(std::floor(xpos), std::floor(ypos) + (float)ch.source_rect.height, z_index);
+// 		positions[1] = vec3(std::floor(xpos) + (float)ch.source_rect.width, std::floor(ypos) + (float)ch.source_rect.height, z_index);
+// 		positions[2] = vec3(std::floor(xpos) + (float)ch.source_rect.width, std::floor(ypos), z_index);
+// 		positions[3] = vec3(std::floor(xpos), std::floor(ypos), z_index);
 
-		for (int j = 0; j < 4; j++)
-		{
+// 		for (int j = 0; j < 4; j++)
+// 		{
 			
-			verticesAttribs[verticeCount] = positions[j].x;
-			verticeCount++;
-			verticesAttribs[verticeCount] = positions[j].y;
-			verticeCount++;
-			verticesAttribs[verticeCount] = positions[j].z;
-			verticeCount++;
-			verticesAttribs[verticeCount] = texCoords[j].x;
-			verticeCount++;
-			verticesAttribs[verticeCount] = texCoords[j].y;
-			verticeCount++;
-			verticesAttribs[verticeCount] = (float)default_font->texture->slot;
-			verticeCount++;
-			verticesAttribs[verticeCount] = color.x;
-			verticeCount++;
-			verticesAttribs[verticeCount] = color.y;
-			verticeCount++;
-			verticesAttribs[verticeCount] = color.z;
-			verticeCount++;
-			verticesAttribs[verticeCount] = color.w;
-			verticeCount++;
-		}
-		z_index -= 0.000001f;
+// 			verticesAttribs[verticeCount] = positions[j].x;
+// 			verticeCount++;
+// 			verticesAttribs[verticeCount] = positions[j].y;
+// 			verticeCount++;
+// 			verticesAttribs[verticeCount] = positions[j].z;
+// 			verticeCount++;
+// 			verticesAttribs[verticeCount] = texCoords[j].x;
+// 			verticeCount++;
+// 			verticesAttribs[verticeCount] = texCoords[j].y;
+// 			verticeCount++;
+// 			verticesAttribs[verticeCount] = (float)default_font->texture->slot;
+// 			verticeCount++;
+// 			verticesAttribs[verticeCount] = color.x;
+// 			verticeCount++;
+// 			verticesAttribs[verticeCount] = color.y;
+// 			verticeCount++;
+// 			verticesAttribs[verticeCount] = color.z;
+// 			verticeCount++;
+// 			verticesAttribs[verticeCount] = color.w;
+// 			verticeCount++;
+// 		}
+// 		z_index -= 0.000001f;
 		
-		char_position.x += ch.advance; 
-	}
-}
-void draw_text(std::string text, Vector2 position, BmFont* font)
-{
-	//GLCall(glUseProgram(shader->program));
-	//glActiveTexture(GL_TEXTURE0);
-	//glBindTexture(GL_TEXTURE_2D, font->texture->rendererID);
-	//glBindVertexArray(vertexArray);
+// 		char_position.x += ch.advance; 
+// 	}
+// }
+// void draw_text(std::string text, Vector2 position, BmFont* font)
+// {
+// 	//GLCall(glUseProgram(shader->program));
+// 	//glActiveTexture(GL_TEXTURE0);
+// 	//glBindTexture(GL_TEXTURE_2D, font->texture->rendererID);
+// 	//glBindVertexArray(vertexArray);
 
-	//iterate through all characters
-	std::string::const_iterator c;
-	for (c = text.begin(); c!= text.end(); c++)
-	{
-		FontChar ch = font->font_chars[*c];
+// 	//iterate through all characters
+// 	std::string::const_iterator c;
+// 	for (c = text.begin(); c!= text.end(); c++)
+// 	{
+// 		FontChar ch = font->font_chars[*c];
 
-		float xpos = position.x + ch.bearing.x;
-		//std::cout << xpos << std::endl;
-		// float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
-		float ypos = position.y + (ch.bearing.y);
+// 		float xpos = position.x + ch.bearing.x;
+// 		//std::cout << xpos << std::endl;
+// 		// float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+// 		float ypos = position.y + (ch.bearing.y);
 
-		float w = (float)ch.source_rect.width;
-		float h = (float)ch.source_rect.height;
+// 		float w = (float)ch.source_rect.width;
+// 		float h = (float)ch.source_rect.height;
 
-		//Calculates texture coordinates of a sprite
-		float texX = (float)ch.source_rect.x;
-		float texY = (font->texture->height - ((ch.source_rect.height * ((ch.source_rect.y + ch.source_rect.height) / (float)ch.source_rect.height))));
-		float texWidth = (texX + ch.source_rect.width) / (float)font->texture->width;
-		float texHeight = (texY + ch.source_rect.height) / (float)font->texture->height;
-		texX /= (float)font->texture->width;
-		texY /= (float)font->texture->height;
-		//Update vertexBuffer for each character
-		// float vertices[6][4] = 
-		// {
-		// 	{xpos,     ypos + h, texX, texY },
-		// 	{xpos,     ypos,     texX, texHeight },
-		// 	{xpos + w, ypos,     texWidth, texHeight },
+// 		//Calculates texture coordinates of a sprite
+// 		float texX = (float)ch.source_rect.x;
+// 		float texY = (font->texture->height - ((ch.source_rect.height * ((ch.source_rect.y + ch.source_rect.height) / (float)ch.source_rect.height))));
+// 		float texWidth = (texX + ch.source_rect.width) / (float)font->texture->width;
+// 		float texHeight = (texY + ch.source_rect.height) / (float)font->texture->height;
+// 		texX /= (float)font->texture->width;
+// 		texY /= (float)font->texture->height;
+// 		//Update vertexBuffer for each character
+// 		// float vertices[6][4] = 
+// 		// {
+// 		// 	{xpos,     ypos + h, texX, texY },
+// 		// 	{xpos,     ypos,     texX, texHeight },
+// 		// 	{xpos + w, ypos,     texWidth, texHeight },
 
-		// 	{xpos,     ypos + h, texX, texY },
-		// 	{xpos + w, ypos    , texWidth, texHeight },
-		// 	{xpos + w, ypos + h, texWidth, texY }
-		// };
-		Vector2 texCoords[4];
-		texCoords[0] = vec2(texX, texY);
-		texCoords[1] = vec2(texWidth, texY);
-		texCoords[2] = vec2(texWidth, texHeight);
-		texCoords[3] = vec2(texX, texHeight);
-		Vector3 positions[4];
-		positions[0] = vec3(std::floor(xpos), std::floor(ypos) + (float)ch.source_rect.height, z_index);
-		positions[1] = vec3(std::floor(xpos) + (float)ch.source_rect.width, std::floor(ypos) + (float)ch.source_rect.height, z_index);
-		positions[2] = vec3(std::floor(xpos) + (float)ch.source_rect.width, std::floor(ypos), z_index);
-		positions[3] = vec3(std::floor(xpos), std::floor(ypos), z_index);
+// 		// 	{xpos,     ypos + h, texX, texY },
+// 		// 	{xpos + w, ypos    , texWidth, texHeight },
+// 		// 	{xpos + w, ypos + h, texWidth, texY }
+// 		// };
+// 		Vector2 texCoords[4];
+// 		texCoords[0] = vec2(texX, texY);
+// 		texCoords[1] = vec2(texWidth, texY);
+// 		texCoords[2] = vec2(texWidth, texHeight);
+// 		texCoords[3] = vec2(texX, texHeight);
+// 		Vector3 positions[4];
+// 		positions[0] = vec3(std::floor(xpos), std::floor(ypos) + (float)ch.source_rect.height, z_index);
+// 		positions[1] = vec3(std::floor(xpos) + (float)ch.source_rect.width, std::floor(ypos) + (float)ch.source_rect.height, z_index);
+// 		positions[2] = vec3(std::floor(xpos) + (float)ch.source_rect.width, std::floor(ypos), z_index);
+// 		positions[3] = vec3(std::floor(xpos), std::floor(ypos), z_index);
 
-		for (int i = 0; i < 4; i++)
-		{
+// 		for (int i = 0; i < 4; i++)
+// 		{
 			
-			verticesAttribs[verticeCount] = positions[i].x;
-			verticesAttribs[verticeCount + 1] = positions[i].y;
-			verticesAttribs[verticeCount + 2] = positions[i].z;
-			verticesAttribs[verticeCount + 3] = texCoords[i].x;
-			verticesAttribs[verticeCount + 4] = texCoords[i].y;
-			verticesAttribs[verticeCount + 5] = (float)font->texture->slot;
-			verticesAttribs[verticeCount + 6] = 1.0f;
-			verticesAttribs[verticeCount + 7] = 1.0f;
-			verticesAttribs[verticeCount + 8] = 1.0f;
-			verticesAttribs[verticeCount + 9] = 1.0f;
-			verticeCount += 10;
-		}
-		z_index -= 0.000001f;
+// 			verticesAttribs[verticeCount] = positions[i].x;
+// 			verticesAttribs[verticeCount + 1] = positions[i].y;
+// 			verticesAttribs[verticeCount + 2] = positions[i].z;
+// 			verticesAttribs[verticeCount + 3] = texCoords[i].x;
+// 			verticesAttribs[verticeCount + 4] = texCoords[i].y;
+// 			verticesAttribs[verticeCount + 5] = (float)font->texture->slot;
+// 			verticesAttribs[verticeCount + 6] = 1.0f;
+// 			verticesAttribs[verticeCount + 7] = 1.0f;
+// 			verticesAttribs[verticeCount + 8] = 1.0f;
+// 			verticesAttribs[verticeCount + 9] = 1.0f;
+// 			verticeCount += 10;
+// 		}
+// 		z_index -= 0.000001f;
 		
-		//Update content of vertexBuffer memory
-		//glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		//glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-		//glBindBuffer(GL_ARRAY_BUFFER, 0);
+// 		//Update content of vertexBuffer memory
+// 		//glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+// 		//glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+// 		//glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
-		position.x += ch.advance; 
-	}
-	//glBindVertexArray(0);
-	//glBindTexture(GL_TEXTURE_2D, 0);
-}
-void draw_true_type_text(Font* font, Shader* shader, std::string text, float x, float y, float scale, Vector4 color, float dt)
-{
-	GLCall(glUseProgram(shader->program));
+// 		//glDrawArrays(GL_TRIANGLES, 0, 6);
+// 		position.x += ch.advance; 
+// 	}
+// 	//glBindVertexArray(0);
+// 	//glBindTexture(GL_TEXTURE_2D, 0);
+// }
+// void draw_true_type_text(Font* font, Shader* shader, std::string text, float x, float y, float scale, Vector4 color, float dt)
+// {
+// 	GLCall(glUseProgram(shader->program));
 	
-	shader->set_uniform_vec4f("text_color", color);
-	//iterate through all characters
-	std::string::const_iterator c;
-	float original_x_position = x;
-	int count = 0;
-	for (c = text.begin(); c!= text.end(); c++)
-	{
-		FontCharacter ch = font->fontCharacters[*c];
+// 	shader->set_uniform_vec4f("text_color", color);
+// 	//iterate through all characters
+// 	std::string::const_iterator c;
+// 	float original_x_position = x;
+// 	int count = 0;
+// 	for (c = text.begin(); c!= text.end(); c++)
+// 	{
+// 		FontCharacter ch = font->fontCharacters[*c];
 
-		float xpos = x + ch.Bearing.x * scale;
-		// float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
-		float ypos = y - (ch.Bearing.y) * scale;
+// 		float xpos = x + ch.Bearing.x * scale;
+// 		// float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+// 		float ypos = y - (ch.Bearing.y) * scale;
 
-		//xpos += sin((dt + count) * 15) * 1;
-		//ypos += sin((dt + count + dt) * 15) * 1;
-		//ypos += (sin((dt + count) * 1)) * 50;
-		//count++;
+// 		//xpos += sin((dt + count) * 15) * 1;
+// 		//ypos += sin((dt + count + dt) * 15) * 1;
+// 		//ypos += (sin((dt + count) * 1)) * 50;
+// 		//count++;
 
-		// if (*c == 32)
-		// {
-		// 	xpos.x += (font->face->glyph->advance.x >> 6) * scale;
-		// 	continue;
-		// }
-		// if (*c == 10)
-		// {
-		// 	xpos = original_x_position;
-		// 	ypos += font->size * scale;
-		// 	continue;
-		// }
+// 		// if (*c == 32)
+// 		// {
+// 		// 	xpos.x += (font->face->glyph->advance.x >> 6) * scale;
+// 		// 	continue;
+// 		// }
+// 		// if (*c == 10)
+// 		// {
+// 		// 	xpos = original_x_position;
+// 		// 	ypos += font->size * scale;
+// 		// 	continue;
+// 		// }
 
-		float w = ch.Size.x * scale;
-		float h = ch.Size.y * scale;
+// 		float w = ch.Size.x * scale;
+// 		float h = ch.Size.y * scale;
 
-		//Update vertexBuffer for each character
-		float vertices[6][4] = 
-		{
-			{xpos,     ypos + h, 0.0f, 1.0f },
-			{xpos,     ypos,     0.0f, 0.0f },
-			{xpos + w, ypos,     1.0f, 0.0f },
+// 		//Update vertexBuffer for each character
+// 		float vertices[6][4] = 
+// 		{
+// 			{xpos,     ypos + h, 0.0f, 1.0f },
+// 			{xpos,     ypos,     0.0f, 0.0f },
+// 			{xpos + w, ypos,     1.0f, 0.0f },
 
-			{xpos,     ypos + h, 0.0f, 1.0f },
-			{xpos + w, ypos    , 1.0f, 0.0f },
-			{xpos + w, ypos + h, 1.0f, 1.0f }
-		};
-		// float vertices[6][4] = 
-		// {
-		// 	{xpos,     ypos + h, 0.0f, 0.0f },
-		// 	{xpos + w, ypos + h, 1.0f, 0.0f },
-		// 	{xpos + w, ypos,     1.0f, 1.0f },
+// 			{xpos,     ypos + h, 0.0f, 1.0f },
+// 			{xpos + w, ypos    , 1.0f, 0.0f },
+// 			{xpos + w, ypos + h, 1.0f, 1.0f }
+// 		};
+// 		// float vertices[6][4] = 
+// 		// {
+// 		// 	{xpos,     ypos + h, 0.0f, 0.0f },
+// 		// 	{xpos + w, ypos + h, 1.0f, 0.0f },
+// 		// 	{xpos + w, ypos,     1.0f, 1.0f },
 
-		// 	{xp	os + w, ypos    , 1.0f, 1.0f },
-		// 	{xpos,     ypos,     0.0f, 1.0f },
-		// 	{xpos,     ypos + h, 0.0f, 0.0f },
-		// };
-    // float vertices[6][4] = 
-    // {
-    //     { xpos,     ypos + h,   0.0f, 0.0f },            
-    //     { xpos,     ypos,       0.0f, 1.0f },
-    //     { xpos + w, ypos,       1.0f, 1.0f },
+// 		// 	{xp	os + w, ypos    , 1.0f, 1.0f },
+// 		// 	{xpos,     ypos,     0.0f, 1.0f },
+// 		// 	{xpos,     ypos + h, 0.0f, 0.0f },
+// 		// };
+//     // float vertices[6][4] = 
+//     // {
+//     //     { xpos,     ypos + h,   0.0f, 0.0f },            
+//     //     { xpos,     ypos,       0.0f, 1.0f },
+//     //     { xpos + w, ypos,       1.0f, 1.0f },
 
-    //     { xpos,     ypos + h,   0.0f, 0.0f },
-    //     { xpos + w, ypos,       1.0f, 1.0f },
-    //     { xpos + w, ypos + h,   1.0f, 0.0f }           
-    // };
+//     //     { xpos,     ypos + h,   0.0f, 0.0f },
+//     //     { xpos + w, ypos,       1.0f, 1.0f },
+//     //     { xpos + w, ypos + h,   1.0f, 0.0f }           
+//     // };
 
 
-	// for (int i = 0; i < 4; i++)
-	// {
+// 	// for (int i = 0; i < 4; i++)
+// 	// {
 		
-	// 	verticesAttribs[verticeCount] = positions[i].x;
-	// 	verticeCount++;
-	// 	verticesAttribs[verticeCount] = positions[i].y;
-	// 	verticeCount++;
-	// 	verticesAttribs[verticeCount] = texCoords[i].x;
-	// 	verticeCount++;
-	// 	verticesAttribs[verticeCount] = texCoords[i].y;
-	// 	verticeCount++;
-	// }
-		glBindVertexArray(true_type_text_vertex_array);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-		//Update content of vertexBuffer memory
-		glBindBuffer(GL_ARRAY_BUFFER, true_type_text_vertex_buffer);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+// 	// 	verticesAttribs[verticeCount] = positions[i].x;
+// 	// 	verticeCount++;
+// 	// 	verticesAttribs[verticeCount] = positions[i].y;
+// 	// 	verticeCount++;
+// 	// 	verticesAttribs[verticeCount] = texCoords[i].x;
+// 	// 	verticeCount++;
+// 	// 	verticesAttribs[verticeCount] = texCoords[i].y;
+// 	// 	verticeCount++;
+// 	// }
+// 		glBindVertexArray(true_type_text_vertex_array);
+// 		glActiveTexture(GL_TEXTURE0);
+// 		glBindTexture(GL_TEXTURE_2D, ch.TextureID);
+// 		//Update content of vertexBuffer memory
+// 		glBindBuffer(GL_ARRAY_BUFFER, true_type_text_vertex_buffer);
+// 		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+// 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		//Advance cursors for next glyph (note that advance is number of 1/64 pixels)
-		x += (ch.Advance >> 6) * scale; //Bitshift by 6 to get value in pixels (2^6 = 64)
-	}
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
+// 		glDrawArrays(GL_TRIANGLES, 0, 6);
+// 		//Advance cursors for next glyph (note that advance is number of 1/64 pixels)
+// 		x += (ch.Advance >> 6) * scale; //Bitshift by 6 to get value in pixels (2^6 = 64)
+// 	}
+// 	glBindVertexArray(0);
+// 	glBindTexture(GL_TEXTURE_2D, 0);
+// }
 void draw_lines_by_points(float* values, int value_count, Shader* shader)
 {
 	for (int i = 0; i < value_count; i++) {

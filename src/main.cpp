@@ -11,12 +11,14 @@
 #include "input/Input.h"
 #include "rendering/Shader.h"
 #include "rendering/RenderTarget.h"
-#include "rendering/Font.h"
 #include "math/common_math.h"
 #include "core/Rectangle.h"
 #include "core/FrameTime.h"
-#include "core/Assets.h"
 #include "core/ScopeTimer.h"
+
+#include "vendor/imgui/imgui.h"
+#include "vendor/imgui/imgui_impl_opengl3.h"
+#include "vendor/imgui/imgui_impl_glfw.h"
 
 //#include <endpointvolume.h>
 
@@ -45,7 +47,7 @@ enum Wave_Type {
     NOISE_WAVE,
     WAVE_TYPE_COUNT
 };
-// Pack the bools into a u32 to shrink the struct size.
+// @TODO: Pack the bools into a u32 to shrink the struct size.
 struct Globals 
 {
     float* points;
@@ -63,6 +65,7 @@ struct Globals
     bool play;
     bool osc2;
     bool pan_mod;
+    bool osc2_just_pressed;
 };
 struct Sample_Info
 {
@@ -93,14 +96,12 @@ int run()
     RenderTarget render_target; 
     make_render_target(&render_target, 1920, 1080);
 
-    init_assets();
     init_input();
 
     Matrix4 full_window_proj = ortho_matrix(0.0f, 1920.0f, 1080.0f, 0.0f, -1.0f, 1.0f);
     Shader* text_shader = new Shader("res/shaders/text.shader");
     Shader* render_target_shader = new Shader("res/shaders/render_target.shader");
     Shader* line_shader = new Shader("res/shaders/line.shader");
-    Font* font_64 = load_font("res/fonts/Bodo Amat.ttf", 64);
 
     Globals globals;
     globals.tone_hz = 440;
@@ -116,6 +117,7 @@ int run()
     globals.play = false;
     globals.osc2 = false;
     globals.pan_mod = false;
+    globals.osc2_just_pressed = false;
     globals.points = (float*)calloc(10000, sizeof(float));
     globals.point_count = 10000;
 
@@ -157,6 +159,7 @@ int run()
 
 void render_ui(Globals* globals)
 {
+
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
@@ -194,14 +197,32 @@ void render_ui(Globals* globals)
 
     ImGui::Checkbox("abs", &globals->abs);
     ImGui::Checkbox("abs_add", &globals->abs_add);
+    bool temp = globals->osc2;
     ImGui::Checkbox("osc2", &globals->osc2);
-
+    if (temp != globals->osc2) {
+        globals->osc2_just_pressed = true;
+    }
 
     ImGui::End();
 
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData()); 
 }
+
+
+struct Wave_Positions
+{
+    f64 exponent;
+    f64 sine;
+    f64 square;
+    f64 half_square;
+    f64 triangle;
+    f64 saw;
+    f64 osc2;
+    f64 amp_mod;
+    f64 pan_mod;
+};
+// Audio thread
 DWORD audio_run(void* temp)
 {
     Globals* globals = (Globals*)temp;
@@ -284,7 +305,13 @@ DWORD audio_run(void* temp)
     hr = audio_client->Start();
     assert(SUCCEEDED(hr));
 
+
+    Wave_Positions wave_positions[sizeof(Wave_Positions) / 8];
+    memset(wave_positions, 0, sizeof(f64) * (sizeof(Wave_Positions) / 8));
+    
+
     while(true) {
+        
     	WaitForSingleObject(h_refill_event, INFINITE);
         
         UINT32 frame_padding_count = 0;
@@ -335,37 +362,40 @@ DWORD audio_run(void* temp)
             sample_info.samples_per_second = format->nSamplesPerSec;
             sample_info.sample_count = sample_count;
             sample_info.samples = (f32*)audio_data;
+            // if (globals->osc2_just_pressed == true) {
+            //     memset(&wave_positions, 0, sizeof(Wave_Positions) / 8);
+            //     globals->osc2_just_pressed = false;
+            // }
             if (globals->play) {
                 if (globals->osc1_wave_type == EXPONENT_WAVE)
-                    output_test_wave(globals, sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
+                    output_test_wave(globals, sample_info, &wave_positions->exponent);
                 else if (globals->osc1_wave_type == SINE_WAVE)
-                    output_sine_wave(sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
+                    output_sine_wave(globals, sample_info, &wave_positions->sine);
                 else if (globals->osc1_wave_type == HALF_SQUARE_WAVE)
-                    output_half_square_wave(sample_info, globals->tone_hz, 
-                                            globals->tone_volume);
+                    output_half_square_wave(globals, sample_info, &wave_positions->half_square);
                 else if (globals->osc1_wave_type == SQUARE_WAVE)
-                    output_square_wave(sample_info, globals->tone_hz, 
-                                            globals->tone_volume);
+                    output_square_wave(globals, sample_info, &wave_positions->square);
                 else if (globals->osc1_wave_type == TRIANGLE_WAVE)
-                    output_triangle_wave(sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
+                    output_triangle_wave(globals, sample_info, &wave_positions->triangle);
                 else if (globals->osc1_wave_type == SAW_WAVE)
-                    output_saw_wave(sample_info, globals->tone_hz, globals->tone_volume, globals->abs);
+                    output_saw_wave(globals, sample_info, &wave_positions->saw);
                 else if (globals->osc1_wave_type == NOISE_WAVE)
-                    output_noise(sample_info, globals->tone_volume);
+                    output_noise(globals, sample_info);
                 if (globals->osc2)
-                    add_by_osc2(sample_info, globals->tone_hz, globals->tone_volume, globals->osc2_wave_type, 
-                                            globals->osc2_wave_percentage / 100, globals->abs_add);
-                amplitude_mod(sample_info, globals->amp_mod_hz);
-                if (!globals->pan_mod) {
-                    pan(sample_info, globals->tone_hz, globals->pan);
-                } else {
-                    pan_mod(sample_info, globals->pan_mod_hz);
+                    add_by_osc2(globals, sample_info, &wave_positions->osc2);
+                if (globals->amp_mod_hz != 0.0f) {
+                    amplitude_mod(globals, sample_info, &wave_positions->amp_mod);
                 }
-                memcpy(globals->points, audio_data, sample_count * 8);
-                // for (int i = 0; i < sample_info.sample_count; i += 2) {
-                //     globals->points[i] = sample_info.samples[i];
-                // }
+                if (!globals->pan_mod) {
+                    pan(globals, sample_info);
+                } else {
+                    pan_mod(globals, sample_info, &wave_positions->pan_mod);
+                }
+                
+                // For rendering the waveform
                 globals->point_count = sample_count * 8;
+                memcpy(globals->points, audio_data, globals->point_count);
+
                 hr = render_client->ReleaseBuffer(sample_count, 0);
            }
             else hr = render_client->ReleaseBuffer(sample_count, AUDCLNT_BUFFERFLAGS_SILENT);
@@ -457,7 +487,6 @@ void init_imgui(Window* window)
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-    io.FontDefault = io.Fonts->AddFontFromFileTTF("res/fonts/Bodo Amat.ttf", 14.0f);
     ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window->glfw_window, true); 
     ImGui_ImplOpenGL3_Init("#version 150");
