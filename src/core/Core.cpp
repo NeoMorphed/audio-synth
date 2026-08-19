@@ -1,6 +1,5 @@
 #include "pch.h"
 
-#include "Assets.cpp"
 #include "ErrorCheck.cpp"
 #include "Log.cpp"
 #include "Monitor.cpp"
