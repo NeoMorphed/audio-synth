@@ -22,7 +22,7 @@ Audio processing runs on a dedicated thread with time-critical priority, while t
 - Run build.bat while in developer command prompt in terminal or after running vcvarsall.bat
 
 ## Third-Party Libraries
-This project stands on the shoulders of these fantastic open-source libraries:
+This project uses these open-source libraries:
 * [GLFW](https://glfw.org) - Window management and input (zlib License)
 * [Dear ImGui](https://github.com) - Graphical user interface (MIT License)
 * [stb_image](https://github.com/nothings/stb) - Image loading (Public Domain / MIT)
