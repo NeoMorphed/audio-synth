@@ -12,6 +12,9 @@ The synthezier interface directly with Windows Core Audio apis, using MMDevice A
 - Play keyboard notes using keys on the keyboard
 - Imgui for user interface controls
 
+## Technical Description
+Audio processing runs on a dedicated thread with time-critical priority, while the main thread handles UI and waveform visualization. The MMDevice API is used to obtain the default audio endpoint, and WASAPI provides audio buffers through event-driven notifications. The audio thread generates waveform samples and writes them directly into the provided buffers, applying effects and parameter adjustments as needed. The main thread renders the generated waveform and exposes synthesizer controls through ImGui.
+
 ## Requirements
 - Visual Studio 2022 build tools
 
