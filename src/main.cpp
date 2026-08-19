@@ -222,6 +222,7 @@ struct Wave_Positions
     f64 amp_mod;
     f64 pan_mod;
 };
+// Audio thread
 DWORD audio_run(void* temp)
 {
     Globals* globals = (Globals*)temp;
