@@ -26,3 +26,10 @@ This project uses these open-source libraries:
 * [GLFW](https://glfw.org) - Window management and input (zlib License)
 * [Dear ImGui](https://github.com) - Graphical user interface (MIT License)
 * [stb_image](https://github.com/nothings/stb) - Image loading (Public Domain / MIT)
+
+Third-party libraries are distributed under their respective licenses, included
+with each library.
+
+
+Copyright © 2026 NeoMorphed. All rights reserved.
+This repository is provided publicly for portfolio and recruitment purposes. The source code may be viewed and evaluated but may not be copied, modified, distributed, or incorporated into other projects without permission.
