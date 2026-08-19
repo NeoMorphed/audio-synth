@@ -1,7 +1,7 @@
 
 # Real-Time Audio Synthesizer
 
-The synthezier interface directly with Windows Core Audio apis, using MMDevice API for discovering audio endpoints and WASAPI for initializing the audio render client and providing the buffers for rendering into. The audio samples are generated in code and copied into the provided buffers.
+The synthesizer interfaces directly with the Windows Core Audio APIs, using the MMDevice API for audio endpoint discovery and WASAPI to initialize the audio render client and manage output buffers. Audio samples are generated in code and written directly into the provided buffers for real-time playback.
 
 ## Features
 - Generation of sine, triangle, square, and saw waves in code.
